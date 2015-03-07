@@ -38,7 +38,7 @@ def GetBlogDetailHtmlByUrl(url):
 
 
 def GetBlogPicsByUrl(html, picDir):
-	picItem = re.findall('<a.*?HREF="(.*?)".*?TARGET="_blank">.*?<img.*?src=".*?".*?real_src =".*?".*?WIDTH="690".*?HEIGHT=".*?".*?NAME=".*?".*?/></A>', html, re.S)
+	picItem = re.findall('<a.*?HREF="(.*?)".*?>.*?<img.*?src=".*?".*?real_src =".*?".*?WIDTH="690".*?HEIGHT=".*?".*?NAME=".*?".*?/></a>', html, re.I)
 	for picUrl in picItem:
 		print 'pirUrl:' + picUrl
 		urlItem = re.findall('.*?photo.blog.sina.com.cn/showpic.html.*?&url=(.*)', picUrl, re.S)
@@ -53,7 +53,7 @@ def SavePic(picUrl, picDir):
 	try:
 		f.write(urllib2.urlopen(picUrl).read())
 	except:
-		print 'Get picture faild:' + pirUrl
+		print 'Get picture faild:' + picUrl
 	f.close()
 
 def UniqueStr():
