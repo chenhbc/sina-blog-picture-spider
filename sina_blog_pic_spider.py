@@ -6,17 +6,26 @@ import re
 import os
 import os.path
 import uuid
+import sys
+import math
+import datetime
 
-# http://s4.sinaimg.cn/middle/488fb2eatb6550a3fc273&690 > http://s4.sinaimg.cn/orignal/488fb2eatb6550a3fc273&690
+uid = "1217377002"
 
-blog_url = "http://blog.sina.com.cn/u/1217377002"
+blog_url = "http://blog.sina.com.cn/u/" + uid
+
 
 headers = {
 	'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6',
-	'Referer':'http://blog.sina.com.cn'
+	'Referer':'http://blog.sina.com.cn',
+    'Connection': 'keep-alive',
+    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
 }
 
 image_path = os.getcwd() + "/sina_blog_pic/"
+
+def GetNextPageUrl(num):
+	return "http://blog.sina.com.cn/s/article_sort_" + uid + "_10001_" + str(num) + ".html"
 
 def GetHtmlByUrl(url):
 	request = urllib2.Request(url, headers = headers)
@@ -59,12 +68,39 @@ def SavePic(picUrl, picDir):
 def UniqueStr():
 	return str(uuid.uuid1())
 
-def GetBlogDetailByPage():
+def GetTotalPageNumber():
 	html = GetHtmlByUrl(blog_url)
+	totalPageItem = re.findall('<div.*?favmd5=.*?.*?classid="0".*?pagesize="10".*?total="(.*?)".*?id="pagination_.*?".*?class="SG_page">.*?</div>', html, re.I)
+	for totalPage in totalPageItem:
+		return math.ceil(int(totalPage) / 10.0)
 
-	detailPageItems = re.findall('<div.*?class="more">.*?<span.*?class="SG_more">.*?<a.*?href="(.*?)".*?target="_blank">查看全文</a>.*?</span>.*?</div>', html, re.S)
+def GetBlogDetailByPage(url, pageNum = 1):
+	print 'To get page ' + str(pageNum)
+	html = GetHtmlByUrl(url)
+	
+	detailPageItems = re.findall('<span.*?class="SG_more">.*?<a.*?href="(.*?)".*?>查看全文</a>.*?</span>', html, re.I)
 	
 	for detailUrl in detailPageItems:
+		print detailUrl
 		GetBlogDetailHtmlByUrl(detailUrl)
 
-GetBlogDetailByPage()
+	global totalPageNumber
+
+	nextPageNumber = pageNum + 1
+
+	if nextPageNumber <= totalPageNumber:
+		GetBlogDetailByPage(GetNextPageUrl(nextPageNumber), nextPageNumber)
+
+def main():
+	startTime = datetime.datetime.now()
+
+	global totalPageNumber
+	totalPageNumber = int(GetTotalPageNumber())
+	print '=================Start, Total Page:' + str(totalPageNumber) + "================="
+	GetBlogDetailByPage(blog_url)
+
+	endTime = datetime.datetime.now()
+	print '=================Over, Cost time:' + str((endTime - startTime).seconds) + 's ================='
+
+if __name__ == "__main__":
+	main()
