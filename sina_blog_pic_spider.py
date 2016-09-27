@@ -60,9 +60,13 @@ def SavePic(picUrl, picDir):
 	print 'picFile:' + picFile
 	f = open(picFile, 'w+')
 	try:
-		f.write(urllib2.urlopen(picUrl).read())
-	except:
+		req = urllib2.Request(picUrl, headers = headers)
+		f.write(urllib2.urlopen(req).read())
+	except Exception, e:
+		print '-----------------------------'
 		print 'Get picture faild:' + picUrl
+		print e
+		print '-----------------------------'
 	f.close()
 
 def UniqueStr():
