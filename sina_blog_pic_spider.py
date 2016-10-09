@@ -10,6 +10,7 @@ import sys
 import math
 import datetime
 
+# 注意，这里是新浪博客的uid，可以通过点击博客中「关于我」，如“http://blog.sina.com.cn/s/profile_1217377002.html”中 profile_后面的一串数字即是
 uid = "1217377002"
 
 blog_url = "http://blog.sina.com.cn/u/" + uid
@@ -38,7 +39,7 @@ def GetBlogDetailHtmlByUrl(url):
 	m = re.search('<div.*?class="articalTitle">.*?<h2.*?class="titName SG_txta">(.*?)</h2>.*?</div>', html, re.S)
 
 	if m:
-		title = m.group(1)
+		title = m.group(1).replace('&nbsp;', ' ')
 		print 'Begin get blog:' + title
 		picDir = image_path + title
 		if not os.path.exists(picDir):
@@ -47,7 +48,7 @@ def GetBlogDetailHtmlByUrl(url):
 
 
 def GetBlogPicsByUrl(html, picDir):
-	picItem = re.findall('<a.*?HREF="(.*?)".*?>.*?<img.*?src=".*?".*?real_src =".*?".*?WIDTH="690".*?HEIGHT=".*?".*?NAME=".*?".*?/></a>', html, re.I)
+	picItem = re.findall('<a.*?HREF="(.*?)".*?>.*?<img.*?src=".*?".*?real_src =".*?".*?/></a>', html, re.I)
 	for picUrl in picItem:
 		print 'pirUrl:' + picUrl
 		urlItem = re.findall('.*?photo.blog.sina.com.cn/showpic.html.*?&url=(.*)', picUrl, re.S)
@@ -102,7 +103,7 @@ def main():
 	totalPageNumber = int(GetTotalPageNumber())
 	print '=================Start, Total Page:' + str(totalPageNumber) + "================="
 	GetBlogDetailByPage(blog_url)
-
+	
 	endTime = datetime.datetime.now()
 	print '=================Over, Cost time:' + str((endTime - startTime).seconds) + 's ================='
 
